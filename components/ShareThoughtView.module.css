@@ -1,0 +1,15 @@
+.container {
+    width: 100%;
+}
+
+.textView {
+    width: 100%;
+    resize: none;
+    border-width: 0cm;
+    text-align: left;
+}
+
+.btnCon {
+    display: flex;
+    justify-content: space-between;
+}

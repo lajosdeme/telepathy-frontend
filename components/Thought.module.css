@@ -1,0 +1,29 @@
+
+.thought {
+    margin-top: 35px;
+    margin-bottom: 50px;
+}
+
+.headerbtn {
+    float: right;
+    color: grey;
+}
+
+.uname {
+    font-weight: bold;
+    color: black;
+}
+
+.handler {
+    font-style: italic;
+    color: grey;
+}
+
+.shareThoughtContainer {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.ui.buttons {
+    float: right;
+}
