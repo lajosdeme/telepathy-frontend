@@ -1,0 +1,19 @@
+.uname {
+    font-weight: bold;
+    color: black;
+}
+
+.handler {
+    font-style: italic;
+    color: grey;
+}
+
+.followBtn {
+    position: absolute;
+    right: 20px;
+}
+
+.listDesc {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}

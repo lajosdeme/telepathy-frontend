@@ -7,7 +7,9 @@ import Footer from './Footer'
 const Layout = (props) => {
     return(
         <Container>
-            <Header/>
+            <Header 
+            home={props.home} 
+            profile={props.profile}/>
             {props.children}
             <Footer/>
         </Container>

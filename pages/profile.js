@@ -6,8 +6,8 @@ import Feed from '../components/Feed'
 export default class Profile extends Component {
     render() {
         return(
-            <Layout>
-                <ProfileView/>
+            <Layout profile={true}>
+                <ProfileView userId={"cosmos1kw4ngcavxd2s60zkms3vxkwu77y60vlvn89ztr"}/>
                 <Feed isProfile={true} />
             </Layout>
         )
