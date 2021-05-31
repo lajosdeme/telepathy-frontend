@@ -1,14 +1,42 @@
 import {Component} from 'react'
 import {List, Image, Button} from 'semantic-ui-react'
 import  styles from './UserListItem.module.css'
+import API from '../services/api'
+import Wallet from '../services/wallet'
+import {SigningCosmosClient} from '@cosmjs/launchpad'
 
 export default class UserListItem extends Component {
-    state = {
-        following: false
+    constructor() {
+        super()
+        this.state = {
+            following: false
+        }
     }
 
-    onClick = () => {
-        this.setState({following: !this.state.following})
+    componentDidMount() {
+        this.setState({following: this.props.following})
+    }
+
+    onClick = async () => {
+        const address = localStorage.getItem("address")
+        const wallet = await Wallet.main.importExisting(localStorage.getItem("mnemonic"))
+        const client = new SigningCosmosClient("http://localhost:1317/", address, wallet)
+
+        if (this.state.following) {
+            await API.main.unfollowUser(client, this.props.user.id).then(res => {
+                console.log(res)
+                this.setState({following: !this.state.following})
+            }).catch(err => {
+                alert(err)
+            })
+        } else {
+            await API.main.followUser(client, this.props.user.id).then(res => {
+                console.log(res)
+                this.setState({following: !this.state.following})
+            }).catch(err => {
+                alert(err)
+            })
+        }
     }
 
     render() {
@@ -16,8 +44,8 @@ export default class UserListItem extends Component {
             <List.Item>
                 <div>
                 <Image avatar src='https://react.semantic-ui.com/images/avatar/small/daniel.jpg' />
-                <span className={styles.uname}>Daniel</span>
-                <span className={styles.handler}> @patrick </span>
+                <span className={styles.uname}>{this.props.user.username}</span>
+                <span className={styles.handler}> @{this.props.user.creator} </span>
                 <span className={styles.followBtn}>
                     <Button 
                     onClick={this.onClick}
@@ -30,12 +58,7 @@ export default class UserListItem extends Component {
                 </div>
             <List.Content>
                 <List.Description className={styles.listDesc}>
-                This is the bio of the user. asd asd as as asd as asd. <br></br> 
-                        asdasasasdas
-                        This is the bio of the user. asd asd as as asd as asd. <br></br> 
-                        asdasasasdas
-                        This is the bio of the user. asd asd as as asd as asd. <br></br> 
-                        asdasasasdas
+                    {this.props.user.bio}
                 </List.Description>
             </List.Content>
             </List.Item>

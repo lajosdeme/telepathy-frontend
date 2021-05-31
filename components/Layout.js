@@ -8,6 +8,7 @@ const Layout = (props) => {
     return(
         <Container>
             <Header 
+            loggedIn={props.loggedIn}
             home={props.home} 
             profile={props.profile}/>
             {props.children}
