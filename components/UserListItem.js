@@ -43,7 +43,7 @@ export default class UserListItem extends Component {
         return(
             <List.Item>
                 <div>
-                <Image avatar src='https://react.semantic-ui.com/images/avatar/small/daniel.jpg' />
+                <Image avatar src='https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg' />
                 <span className={styles.uname}>{this.props.user.username}</span>
                 <span className={styles.handler}> @{this.props.user.creator} </span>
                 <span className={styles.followBtn}>

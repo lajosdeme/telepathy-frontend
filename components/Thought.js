@@ -30,6 +30,8 @@ export default class Thought extends Component {
         
         const likesSet = new Set(this.props.thought.likes)
         this.setState({likes: likesSet, liked: likesSet.has(address), client: client, address: address, loading: false})
+
+        document.addEventListener("reloadFeed", this.hideEditThought)
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -40,6 +42,7 @@ export default class Thought extends Component {
     }
 
     thoughtClicked = () => {
+        /* console.log("IS COMMNETS: ", this.props.isComments) */
         const as = this.props.isComments ? `/comment/${this.props.thought.id}` : `/thought/${this.props.thought.id}`
         const id = Math.random().toString(36).substring(7)
         Router.push({
@@ -84,13 +87,19 @@ export default class Thought extends Component {
     }
 
     optionSelected = async (e, {value}) => {
+        const isComments = this.props.isComments
+
         switch (value) {
             case "delete":
                 //delete
-                const result = await API.main.deleteThought(this.state.client, this.props.thought.id)
+                this.setState({loading: true})
+                const result = isComments ? 
+                    await API.main.deleteComment(this.state.client, this.props.thought.id) : 
+                    await API.main.deleteThought(this.state.client, this.props.thought.id)
                 console.log(result)
                 const event = new Event('reloadFeed')
                 document.dispatchEvent(event)
+                this.setState({loading: false})
                 break
             case "edit":
                 this.setState({editThoughtOn: true})
@@ -127,7 +136,6 @@ export default class Thought extends Component {
 
     avatarClicked = (e) => {
         e.stopPropagation()
-        console.log("avatar clicked")
         Router.push({
             pathname: "/profile",
             query: {userId: this.props.thought.creator}
@@ -144,8 +152,8 @@ export default class Thought extends Component {
         //console.log(createdAt.split("+")[0])
         //const time = moment(createdAt.split("m")[0], "`YYYY-MM-DDTHH:mm:ss.sssZ").fromNow()
         const options = [
-            {key: "delete", text: `Delete thought`, value: "delete", icon: "delete"},
-            {key: "edit", text: `Edit thought`, value: "edit", icon: "edit"} 
+            {key: "delete", text: `Delete ${this.props.isComments ? "Comment" : "Thought"}`, value: "delete", icon: "delete"},
+            {key: "edit", text: `Edit ${this.props.isComments ? "Comment" : "Thought"}`, value: "edit", icon: "edit"} 
         ]
 
         return(
@@ -153,7 +161,7 @@ export default class Thought extends Component {
                 <Container text>
                     <div>
                         <Loader active={this.state.loading} />
-                        <Image onClick={this.avatarClicked} src='https://react.semantic-ui.com/images/avatar/large/patrick.png' avatar/> 
+                        <Image onClick={this.avatarClicked} src='https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg' avatar/> 
                         <span className={styles.uname}>{createdBy.username}</span> 
                         <span className={styles.handler}> @{creator} </span>
                         <span className={styles.handler}> · 3h</span>
@@ -167,7 +175,10 @@ export default class Thought extends Component {
                             trigger={<></>}
                             icon="ellipsis horizontal" 
                             text=" "
+                            onClose={console.log("closed 1.")}
                             onChange={this.optionSelected}
+                            selectOnNavigation={false}
+                            selectOnBlur={false}
                             value=""
                             />
                         </Button.Group>
@@ -211,7 +222,7 @@ export default class Thought extends Component {
                 open={this.state.editThoughtOn}>
                     <div className={styles.shareThoughtContainer}>
                         <ShareThoughtView
-                        isComment={false}
+                        isComment={this.props.isComments}
                         isEdit={true}
                         id={this.props.thought.id}
                         commentThoughtId={this.props.isComments ? "" : this.props.thought.id}

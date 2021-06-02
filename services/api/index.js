@@ -25,7 +25,6 @@ export default class TelepathyAPI {
             return result
         }
 
-        //CORS policy error... not working...
         async function handlePut(client, endpoint, jsonString) {
             let result
             const config = { headers: {"Accept": "application/json", "Content-Type": "application/json"} }
@@ -65,7 +64,11 @@ export default class TelepathyAPI {
         }
 
         this.main = {
-            //GET REQUESTS
+
+/* ---------------------------------------------------------------------------------------------- */
+/* ---------------------------------------- GET REQUESTS ---------------------------------------- */
+/* ---------------------------------------------------------------------------------------------- */
+
             listAllUsers: async () => {
                 let result = await axios.get(`${this.rest}/telepathy/user`)
                 return result.data.result
@@ -111,7 +114,14 @@ export default class TelepathyAPI {
                 return result.data.result
             },
 
-            //POST REQUESTS
+            listCommentsForComment: async (ownerCommentId) => {
+                let result = await axios.get(`${this.rest}/telepathy/comment/${ownerCommentId}/comments`)
+                return result.data.result
+            },
+
+/* ---------------------------------------------------------------------------------------------- */
+/* --------------------------------------- POST REQUESTS ---------------------------------------- */
+/* ---------------------------------------------------------------------------------------------- */
             //Create user
             createUser: async (client, username, bio) => {
                 const address = client.signerAddress
@@ -261,7 +271,27 @@ export default class TelepathyAPI {
                 return result
             },
 
-            //PUT REQUESTS
+            //Set avatar
+            setAvatar: async (client, userId, hash) => {
+                const address = client.signerAddress
+                const endpoint = `${this.rest}/telepathy/user/avatar`
+                const jsonString = JSON.stringify({
+                    base_req: {
+                        chain_id: chainId,
+                        from: address 
+                    },
+                    creator: address,
+                    id: userId,
+                    avatar: hash
+                })
+                console.log("JSON: ", jsonString)
+                const result = await handlePost(client, endpoint, jsonString)
+                return result
+            },
+
+/* ---------------------------------------------------------------------------------------------- */
+/* ---------------------------------------- PUT REQUESTS ---------------------------------------- */
+/* ---------------------------------------------------------------------------------------------- */
             setUser: async (client, username, bio) => {
                 const address = client.signerAddress
                 const endpoint = `${this.rest}/telepathy/user`
@@ -315,7 +345,9 @@ export default class TelepathyAPI {
                 return result
             },
 
-            //DELETE REQUESTS
+/* ---------------------------------------------------------------------------------------------- */
+/* ------------------------------------- DELETE REQUESTS ---------------------------------------- */
+/* ---------------------------------------------------------------------------------------------- */
             deleteUser: async (client) => {
                 const address = client.signerAddress
                 const endpoint = `${this.rest}/telepathy/user`

@@ -48,6 +48,7 @@ export default class ShareThoughtView extends Component {
                 await API.main.setComment(this.state.client, this.props.id, this.state.message, this.state.commentThoughtId, this.props.ownerCommentId) :
                 await API.main.createComment(this.state.client, this.state.commentThoughtId, this.props.ownerCommentId, this.state.message)
             this.setState({message: "", loading: false})
+            console.log(result, "commentedited: ", this.state.isEdit)
             const event = new Event('reloadFeed')
             document.dispatchEvent(event)
         } else {
@@ -55,6 +56,7 @@ export default class ShareThoughtView extends Component {
                 await API.main.setThought(this.state.client, this.state.message, this.props.id) : 
                 await API.main.createThought(this.state.client, this.state.message)
             this.setState({message: "", loading: false})
+            console.log(result, "thought edited: ", this.state.isEdit)
             const event = new Event('reloadFeed')
             document.dispatchEvent(event)
         }
@@ -63,11 +65,11 @@ export default class ShareThoughtView extends Component {
     render() {
         return(
             <div className={styles.container}>
-                <Loader active={this.state.loading}/>
+                
                 <div className={styles.grid}>
                 <Grid centered columns={2}>
                     <Grid.Column centered width={this.props.imgWidth}>
-                        <Image src='https://react.semantic-ui.com/images/avatar/large/patrick.png' circular size="tiny"/>
+                        <Image src='https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg' circular size="tiny"/>
                     </Grid.Column>
                     <Grid.Column width={this.props.textWidth}>
                         <TextareaAutoresize
@@ -88,6 +90,7 @@ export default class ShareThoughtView extends Component {
                     </Grid.Column>
                 </Grid>
                 </div>
+                <Loader active={this.state.loading}/>
             </div>
         )
     }

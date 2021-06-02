@@ -25,20 +25,25 @@ export default class Feed extends Component {
     reloadFeed = async () => {
         if (this.props.isProfile) {
             const address = localStorage.getItem("address")
-
+            //feed is on user profile, list thoughts
             await API.main.listThoughtsByCreator(address).then((thoughts) => {
                 this.setState({isLoaded: true, thoughts: thoughts === null ? [] : thoughts})
             })
         } 
         else if (this.props.isComments && this.props.thoughtId != null) {
+            //feed is under a thought, list comments for it
             await API.main.listCommentsForThought(this.props.thoughtId).then((comments) => {
                 this.setState({isLoaded: true, thoughts: comments === null ? [] : comments})
             })
         }
         else if (this.props.isComments && this.props.commentId != null) {
-            this.setState({isLoaded: true, thoughts: this.props.comments === null ? [] : this.props.comments})
+            //feed is comments under a comment, list them
+            await API.main.listCommentsForComment(this.props.commentId).then(comments => {
+                this.setState({isLoaded: true, thoughts: comments === null ? [] : comments})
+            })
         }
         else {
+            //feed is on the main page, list all thoughts
             await API.main.listAllThoughts().then((thoughts) => {
                 this.setState({isLoaded: true, thoughts: thoughts === null ? [] : thoughts})
             })
@@ -51,7 +56,7 @@ export default class Feed extends Component {
                 <div hidden={!this.props.isProfile}>
                     <Grid textAlign="center" className={styles.importBtn}>
                         <Popup 
-                        content="Import your tweets as thoughts from Twitter into Telepathy." 
+                        content="Import your tweets as thoughts from Twitter into Telepathy. (Not implemented yet.)" 
                         trigger={<Button floated="right" size="tiny" color="twitter">Import your tweets from Twitter</Button>} 
                         />
                     </Grid>

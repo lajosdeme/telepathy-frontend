@@ -4,6 +4,7 @@ import TextareaAutoresize from 'react-textarea-autosize'
 import UserList from './UserList'
 import API from '../services/api'
 import Wallet from '../services/wallet'
+import Ipfs from '../services//ipfs'
 import {SigningCosmosClient} from '@cosmjs/launchpad'
 
 export default class ProfileView extends Component {
@@ -25,6 +26,8 @@ export default class ProfileView extends Component {
     }
 
     async componentDidMount() {
+        this.fileSelector = this.buildFileSelector()
+
         this.setState({loading: true})
         const address = localStorage.getItem("address")
         const wallet = await Wallet.main.importExisting(localStorage.getItem("mnemonic"))
@@ -57,6 +60,10 @@ export default class ProfileView extends Component {
         this.setState({bio: e.target.value})
     }
 
+    getUserId = () => {
+        return this.state.user.id
+    }
+
     followAction = async () => {
         this.setState({loading: true})
         if (this.state.following) {
@@ -84,19 +91,24 @@ export default class ProfileView extends Component {
     }
 
     setEditProfile = async () => {
+        this.setState({loading: true})
         if (!this.state.exists) {
             await API.main.createUser(this.state.client, this.state.username, this.state.bio).then(user => {
-                this.setState({user: user})
+                this.setState({user: user, loading: false})
             }).catch(err => {
                 alert(err)
+                this.setState({loading: false})
             })
         } else {
-            //cors error...
-            console.log(this.state.user, "userrr")
-            await API.main.setUser(this.state.client, this.state.username, this.state.bio).then(user => {
-                this.setState({user: user})
+            await API.main.setUser(this.state.client, this.state.username, this.state.bio).then(res => {
+                console.log(res)
+                let user = this.state.user
+                user.username = this.state.username
+                user.bio = this.state.bio
+                this.setState({user: user, loading: false})
             }).catch(err => {
                 alert(err)
+                this.setState({loading: false})
             })
         }
     }
@@ -106,13 +118,41 @@ export default class ProfileView extends Component {
         this.setState({username: user.username, bio: user.bio})
     }
 
+    openFileSelect = () => {
+        if (this.state.isOwner)
+        this.fileSelector.click()
+    }
+
+    buildFileSelector = () => {
+
+        const fileSelector = document.createElement('input');
+        fileSelector.setAttribute('type', 'file');
+        fileSelector.setAttribute('accept', 'image/*')
+    
+        fileSelector.addEventListener('input', async (e) => {
+            const {files} = e.target
+            const img = files[0]
+            const hash = await Ipfs.addFile(img)
+    
+            console.log("HAHHH: ", hash)
+    
+            await API.main.setAvatar(this.state.client, this.state.user.id, hash).then(res => {
+                console.log("IMG UPLOADED WITH HASH: ", hash, res)
+            }).catch(err => {
+                console.log("IMG ERRORED WITH HASH: ", err)
+            })
+    
+        })
+        return fileSelector;
+    }
+
     render() {
         const {followers, following} = this.state.user
         return(
             <div>
                 <Loader active={this.state.loading}/>
                 <Container textAlign="center"> 
-                    <Image src='https://react.semantic-ui.com/images/avatar/large/patrick.png' circular centered size="small"/>               
+                    <Image onClick={this.openFileSelect} style={{background: "grey"}} src="https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg" circular centered size="small"/>               
                     <Header as="h2" style={{marginBottom: '0px'}}>{this.state.user.username}</Header>
                     <Header sub style={{marginTop: '0px'}}>@{this.state.user.creator}</Header>
                     <Label basic pointing>
@@ -140,7 +180,7 @@ export default class ProfileView extends Component {
                         >
                             <Modal.Header>Edit profile</Modal.Header>
                             <Modal.Content>
-                                <Image src='https://react.semantic-ui.com/images/avatar/large/patrick.png' circular centered size="small"/>
+                                <Image src="https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg" circular centered size="small"/>
                                 <Form>
                                     <Form.Field>
                                         <label>Username</label>
