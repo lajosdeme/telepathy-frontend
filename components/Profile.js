@@ -1,5 +1,5 @@
 import {Component} from 'react'
-import { Button, Container, Divider, Form, Grid, Header, Icon, Image, Label, Loader, Modal } from 'semantic-ui-react'
+import { Button, Container, Divider, Form, Grid, Header, Popup, Image, Label, Loader, Modal } from 'semantic-ui-react'
 import TextareaAutoresize from 'react-textarea-autosize'
 import UserList from './UserList'
 import API from '../services/api'
@@ -21,7 +21,8 @@ export default class ProfileView extends Component {
             exists: true,
             isFollowers: true,
             userListUsers: [],
-            following: true
+            following: true,
+            avatar: ""
         }
     }
 
@@ -38,7 +39,16 @@ export default class ProfileView extends Component {
         await API.main.getProfile(profileId).then((user) => {
             const {username, creator, bio} = user
             const following = user.followers != undefined && user.followers.map(user => user.id).includes(address)
-            this.setState({loading: false, client: client, username: username, creator: creator, bio: bio, user: user, isOwner: isOwner, following: following})
+            this.setState({
+                loading: false, 
+                client: client, 
+                username: username, 
+                creator: creator, 
+                bio: bio, 
+                user: user, 
+                isOwner: isOwner, 
+                following: following, 
+                avatar: user.avatar})
         }).catch(err => {
             this.setState({loading: false, client: client, exists: false})
             console.log(err)
@@ -68,9 +78,7 @@ export default class ProfileView extends Component {
         this.setState({loading: true})
         if (this.state.following) {
             await API.main.unfollowUser(this.state.client, this.state.user.id).then(async res => {
-                console.log(res)
                 await API.main.getProfile(this.state.user.id).then(user => {
-                    console.log("user --> ", user)
                     this.setState({following: !this.state.following, user: user, loading: false})
                 }).catch(err => {
                     alert(err)
@@ -79,7 +87,6 @@ export default class ProfileView extends Component {
             })
         } else {
             await API.main.followUser(this.state.client, this.state.user.id).then(async res => {
-                console.log(res)
                 await API.main.getProfile(this.state.user.id).then(user => {
                     this.setState({following: !this.state.following, user: user, loading: false})
                 }).catch(err => {
@@ -101,7 +108,6 @@ export default class ProfileView extends Component {
             })
         } else {
             await API.main.setUser(this.state.client, this.state.username, this.state.bio).then(res => {
-                console.log(res)
                 let user = this.state.user
                 user.username = this.state.username
                 user.bio = this.state.bio
@@ -124,25 +130,23 @@ export default class ProfileView extends Component {
     }
 
     buildFileSelector = () => {
-
         const fileSelector = document.createElement('input');
         fileSelector.setAttribute('type', 'file');
         fileSelector.setAttribute('accept', 'image/*')
     
         fileSelector.addEventListener('input', async (e) => {
+            this.setState({loading: true})
             const {files} = e.target
             const img = files[0]
             const hash = await Ipfs.addFile(img)
     
-            console.log("HAHHH: ", hash)
-    
             await API.main.setAvatar(this.state.client, this.state.user.id, hash).then(res => {
-                console.log("IMG UPLOADED WITH HASH: ", hash, res)
+                this.setState({loading: false, avatar: hash})
             }).catch(err => {
-                console.log("IMG ERRORED WITH HASH: ", err)
+                this.setState({loading: false})
             })
-    
         })
+
         return fileSelector;
     }
 
@@ -152,7 +156,10 @@ export default class ProfileView extends Component {
             <div>
                 <Loader active={this.state.loading}/>
                 <Container textAlign="center"> 
-                    <Image onClick={this.openFileSelect} style={{background: "grey"}} src="https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg" circular centered size="small"/>               
+                <Popup 
+                    content="Tap to edit." 
+                    trigger={<Image onClick={this.openFileSelect} style={{background: "grey"}} src={this.state.avatar === "" ? 'https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg' : `https://ipfs.io/ipfs/${this.state.avatar}`} circular centered size="small"/>} 
+                />             
                     <Header as="h2" style={{marginBottom: '0px'}}>{this.state.user.username}</Header>
                     <Header sub style={{marginTop: '0px'}}>@{this.state.user.creator}</Header>
                     <Label basic pointing>
@@ -180,7 +187,7 @@ export default class ProfileView extends Component {
                         >
                             <Modal.Header>Edit profile</Modal.Header>
                             <Modal.Content>
-                                <Image src="https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg" circular centered size="small"/>
+                                <Image src={this.state.avatar === "" ? 'https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg' : `https://ipfs.io/ipfs/${this.state.avatar}`} circular centered size="small"/>
                                 <Form>
                                     <Form.Field>
                                         <label>Username</label>

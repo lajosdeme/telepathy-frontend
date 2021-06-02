@@ -6,7 +6,6 @@ export default class TelepathyWallet {
             importExisting: async (mnemonic) => {
                 const wallet = await Secp256k1HdWallet.fromMnemonic(mnemonic)
                 const [{ address }] = await wallet.getAccounts();
-                console.log("Address:", address);
                 return wallet
             }
         }

@@ -84,6 +84,11 @@ export default class TelepathyAPI {
                 return result.data.result
             },
 
+            getAvatar: async (userId) => {
+                let result = await axios.get(`${this.rest}/telepathy/user/avatar/${userId}`)
+                return result.data.result
+            },
+
             listThoughtsByCreator: async (creatorId) => {
                 let result = await axios.get(`${this.rest}/telepathy/user/${creatorId}/thoughts`)
                 return result.data.result
@@ -202,7 +207,6 @@ export default class TelepathyAPI {
                 })
 
                 const result = await handlePost(client, endpoint, jsonString)
-                console.log("result: ", result)
                 return result
             },
 
@@ -284,7 +288,6 @@ export default class TelepathyAPI {
                     id: userId,
                     avatar: hash
                 })
-                console.log("JSON: ", jsonString)
                 const result = await handlePost(client, endpoint, jsonString)
                 return result
             },

@@ -7,6 +7,7 @@ import API from '../services/api'
 import Wallet from '../services/wallet'
 import {SigningCosmosClient} from '@cosmjs/launchpad'
 import Router from 'next/router'
+import moment from 'moment'
 
 export default class Thought extends Component {
 
@@ -17,11 +18,11 @@ export default class Thought extends Component {
         address: "",
         loading: false,
         key: undefined,
-        editThoughtOn: false
+        editThoughtOn: false,
+        avatar: ""
     }
 
     async componentDidMount() {
-        //console.log(this.props.thought, "FIRST ONE")
         this.setState({loading: true})
         const address = localStorage.getItem("address")
         const wallet = await Wallet.main.importExisting(localStorage.getItem("mnemonic"))
@@ -32,17 +33,24 @@ export default class Thought extends Component {
         this.setState({likes: likesSet, liked: likesSet.has(address), client: client, address: address, loading: false})
 
         document.addEventListener("reloadFeed", this.hideEditThought)
+
+        await API.main.getAvatar(this.props.thought.creator).then(avatar => {
+            this.setState({avatar: avatar})
+        })
     }
 
-    componentDidUpdate(prevProps, prevState) {
+    async componentDidUpdate(prevProps, prevState) {
         if (prevProps.thought.id != this.props.thought.id) {
             const likesSet = new Set(this.props.thought.likes)
             this.setState({likes: likesSet, liked: likesSet.has(this.state.address)})
+
+            await API.main.getAvatar(this.props.thought.creator).then(avatar => {
+                this.setState({avatar: avatar})
+            })
         }
     }
 
     thoughtClicked = () => {
-        /* console.log("IS COMMNETS: ", this.props.isComments) */
         const as = this.props.isComments ? `/comment/${this.props.thought.id}` : `/thought/${this.props.thought.id}`
         const id = Math.random().toString(36).substring(7)
         Router.push({
@@ -96,7 +104,7 @@ export default class Thought extends Component {
                 const result = isComments ? 
                     await API.main.deleteComment(this.state.client, this.props.thought.id) : 
                     await API.main.deleteThought(this.state.client, this.props.thought.id)
-                console.log(result)
+                
                 const event = new Event('reloadFeed')
                 document.dispatchEvent(event)
                 this.setState({loading: false})
@@ -107,12 +115,10 @@ export default class Thought extends Component {
             case "follow":
                 const followers = new Set(this.props.thought.createdBy.followers)
                 const userId = this.props.thought.createdBy.id
-                console.log(userId, "userid")
-                console.log(this.props.thought, "thought")
+
                 if (followers.has(this.state.address)) {
                     //unfollow
                     await API.main.unfollowUser(this.state.client, userId).then(res => {
-                        console.log(res)
                         this.setState({loading: false})
                     }).catch(err => {
                         alert(err)
@@ -120,7 +126,6 @@ export default class Thought extends Component {
                 } else {
                     //follow
                     await API.main.followUser(this.state.client, userId).then(res => {
-                        console.log(res)
                         this.setState({loading: false})
                     }).catch(err => {
                         alert(err)
@@ -149,8 +154,12 @@ export default class Thought extends Component {
         
         const {comments, createdAt, createdBy, creator, message, shares} = this.props.thought
 
-        //console.log(createdAt.split("+")[0])
-        //const time = moment(createdAt.split("m")[0], "`YYYY-MM-DDTHH:mm:ss.sssZ").fromNow()
+        const dateStr = createdAt.split("+")[0]
+        const date = new Date(dateStr)
+        const distance = moment(date).fromNow()
+        console.log(distance)
+
+
         const options = [
             {key: "delete", text: `Delete ${this.props.isComments ? "Comment" : "Thought"}`, value: "delete", icon: "delete"},
             {key: "edit", text: `Edit ${this.props.isComments ? "Comment" : "Thought"}`, value: "edit", icon: "edit"} 
@@ -161,10 +170,14 @@ export default class Thought extends Component {
                 <Container text>
                     <div>
                         <Loader active={this.state.loading} />
-                        <Image onClick={this.avatarClicked} src='https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg' avatar/> 
+                        <Image 
+                            onClick={this.avatarClicked} 
+                            src={this.state.avatar === "" ? 
+                            'https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg' : 
+                            `https://ipfs.io/ipfs/${this.state.avatar}` } avatar/> 
                         <span className={styles.uname}>{createdBy.username}</span> 
                         <span className={styles.handler}> @{creator} </span>
-                        <span className={styles.handler}> · 3h</span>
+                        <span className={styles.handler}> · {distance}</span>
                         <Button.Group className={styles.headerbtn}>
                             <Dropdown
                             disabled={this.state.address != this.props.thought.creator}

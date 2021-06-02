@@ -9,12 +9,17 @@ export default class UserListItem extends Component {
     constructor() {
         super()
         this.state = {
-            following: false
+            following: false,
+            avatar: ""
         }
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         this.setState({following: this.props.following})
+
+        await API.main.getAvatar(this.props.user.id).then(avatar => {
+            this.setState({avatar: avatar})
+        })
     }
 
     onClick = async () => {
@@ -43,7 +48,7 @@ export default class UserListItem extends Component {
         return(
             <List.Item>
                 <div>
-                <Image avatar src='https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg' />
+                <Image avatar src={this.state.avatar === "" ? 'https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg' : `https://ipfs.io/ipfs/${this.state.avatar}` } />
                 <span className={styles.uname}>{this.props.user.username}</span>
                 <span className={styles.handler}> @{this.props.user.creator} </span>
                 <span className={styles.followBtn}>

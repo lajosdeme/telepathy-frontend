@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import { Button, Container, Header, Input, Modal } from 'semantic-ui-react'
+import { Button, Container, Header, Input, Modal, Message } from 'semantic-ui-react'
 import Layout from '../components/Layout'
 import styles from './welcome.module.css'
 import Wallet from '../services/wallet'
@@ -18,7 +18,6 @@ export default class Welcome extends Component {
     }
 
     logIn = async () => {
-        console.log("logging")
         const wallet = await Wallet.main.importExisting(this.state.mnemonic)
         const [{address}] = await wallet.getAccounts();
 
@@ -64,11 +63,55 @@ export default class Welcome extends Component {
                         </Header.Subheader>
                         </Header>
                         <Modal
+                        closeIcon
                         trigger={<div className={styles.buttonContainer}><Button color="twitter" className={styles.welcomeButton}>Create a Telepathy Wallet</Button></div>}
                         >
                             <Modal.Content>
                                 <Modal.Description>
-                                    <p>Please follow instructions on how to set up your wallet. (There will be a link to the docs here...)</p>
+                                    <Header as="h3">Installation</Header>
+                                    <p>Make sure <b>Go 1.15+</b> is installed on your workstation.</p>
+                                    <p>If you want to test locally make sure <b>starport</b> is also installed.</p>
+                                    <p>Make sure you have <b>IPFS</b> installed for uploading profile pictures.</p>
+                                    <br></br>
+                                    <p>Clone the main repo:</p>
+                                    <Message color="black">git clone github.com/lajosdeme/Telepathy.git</Message>
+                                    <p>Run the makefile:</p>
+                                    <Message color="black">cd telepathy && make</Message>
+                                    <p>Init the config files:</p>
+                                    <Message color="black">$ sh scripts/start.sh</Message>
+                                    <div>
+                                    <span>Set your nginx sever to reverse proxy the request for telepathy by adding the contents from </span>
+                                    <span><Message color="black" compact> scripts/nginx.conf </Message></span>
+                                    <span> to your config file.</span>
+                                    </div>
+                                    <br></br>
+                                    <p>Start a local IPFS daemon: </p>
+                                    <Message color="black">$ ipfs daemon</Message>
+                                    <br></br>
+                                    <Header as="h3">Running the node</Header>
+                                    <div>
+                                     <span><p>Initialize the genesis and create test accounts by running </p></span>  
+                                     <span> <Message color="black" compact> $ starport serve</Message></span> 
+                                     <p>(Make sure to write down the mnemonic created here to log in to the frontend with these wallets.)</p>
+                                    </div>
+                                    <br></br>
+                                    <p>Now if you want to run manually you can spin up your node by running:</p>
+                                    <Message color="black">$ telepathyd start</Message>
+                                    <br></br>
+                                    <p>and the rest server: </p>
+                                    <Message color="black">$ telepathycli rest-server --chain-id telepathy --trust-node --unsafe-cors</Message>
+                                    <br></br>
+                                    <Header as="h3">Experiment with the CLI</Header>
+                                    <p>During the config process two test wallets are created with the names <i>alice</i> and <i>bob</i>. Start by creating a user profile for one or both of them on Telepathy.</p>
+                                    <Message color="black">$ telepathycli tx telepathy create-user "alice" "This is a short bio for alice" --from alice </Message>
+                                    <p>Post your first thought</p>
+                                    <Message color="black">$ telepathycli tx telepathy create-thought "Posting my first thought on Telepathy" --from alice</Message>
+                                    <br></br>
+                                    <Header as="h3">Creating a new wallet</Header>
+                                    <p>A new wallet can be created by:</p>
+                                    <Message color="black">$ telepathycli keys add walletnew </Message>
+                                    <p>Send some tokens to it before you can use it:</p>
+                                    <Message color="black">$ telepathycli tx send $FROM_ADDRESS $RECIPIENT $VALUE</Message>
                                 </Modal.Description>
                             </Modal.Content>
                         </Modal>

@@ -18,7 +18,8 @@ export default class ShareThoughtView extends Component {
             ownerCommentId: "",
             client: SigningCosmosClient,
             message: "",
-            loading: false
+            loading: false,
+            avatar: ""
         }
     }
 
@@ -32,7 +33,12 @@ export default class ShareThoughtView extends Component {
             isComment: this.props.isComment, 
             commentThoughtId: this.props.commentThoughtId, 
             ownerCommentId: this.props.ownerCommentId, 
-            message: this.props.message != undefined ? this.props.message : ""})
+            message: this.props.message != undefined ? this.props.message : ""
+        })
+
+        await API.main.getAvatar(address).then(avatar => {
+            this.setState({avatar: avatar})
+        })
     }
 
     newThoughtChanged = (e) => {
@@ -48,7 +54,6 @@ export default class ShareThoughtView extends Component {
                 await API.main.setComment(this.state.client, this.props.id, this.state.message, this.state.commentThoughtId, this.props.ownerCommentId) :
                 await API.main.createComment(this.state.client, this.state.commentThoughtId, this.props.ownerCommentId, this.state.message)
             this.setState({message: "", loading: false})
-            console.log(result, "commentedited: ", this.state.isEdit)
             const event = new Event('reloadFeed')
             document.dispatchEvent(event)
         } else {
@@ -56,7 +61,6 @@ export default class ShareThoughtView extends Component {
                 await API.main.setThought(this.state.client, this.state.message, this.props.id) : 
                 await API.main.createThought(this.state.client, this.state.message)
             this.setState({message: "", loading: false})
-            console.log(result, "thought edited: ", this.state.isEdit)
             const event = new Event('reloadFeed')
             document.dispatchEvent(event)
         }
@@ -69,7 +73,9 @@ export default class ShareThoughtView extends Component {
                 <div className={styles.grid}>
                 <Grid centered columns={2}>
                     <Grid.Column centered width={this.props.imgWidth}>
-                        <Image src='https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg' circular size="tiny"/>
+                        <Image src={this.state.avatar === "" ? 
+                        'https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg' : 
+                        `https://ipfs.io/ipfs/${this.state.avatar}` } circular size="tiny"/>
                     </Grid.Column>
                     <Grid.Column width={this.props.textWidth}>
                         <TextareaAutoresize

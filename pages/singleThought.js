@@ -45,13 +45,11 @@ class SingleThought extends Component {
             const key = this.props.router.query.key
 
             if (isComments === "true") {
-                console.log(isComments), "cccccccc"
                 await API.main.getComment(thoughtId).then(comment => {
                     this.setState({loading: false, comment: [comment], key: key, isComments: true})
                 })
             } 
             else {
-                console.log(isComments, "ttttttt")
                 await API.main.getThought(thoughtId).then(thought => {
                     this.setState({loading: false, thought: [thought], key: key, isComments: false}) 
                 }) 
