@@ -9,7 +9,6 @@ export default class IpfsClient {
             let result
 
             await ipfs.add(img).then(async res => {
-                console.log(res)
                 const hash = res.path
                 result = hash
             }).catch(err => {

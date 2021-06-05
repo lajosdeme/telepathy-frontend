@@ -2,12 +2,12 @@ import { Component } from 'react'
 import {Button, Container, Divider, Dropdown, Feed, Icon, Image, Loader, Modal} from 'semantic-ui-react'
 import ShareThoughtView from './ShareThoughtView'
 import styles from './Thought.module.css'
-//import moment from 'moment'
 import API from '../services/api'
 import Wallet from '../services/wallet'
 import {SigningCosmosClient} from '@cosmjs/launchpad'
 import Router from 'next/router'
 import moment from 'moment'
+import Events from '../config/events'
 
 export default class Thought extends Component {
 
@@ -32,10 +32,12 @@ export default class Thought extends Component {
         const likesSet = new Set(this.props.thought.likes)
         this.setState({likes: likesSet, liked: likesSet.has(address), client: client, address: address, loading: false})
 
-        document.addEventListener("reloadFeed", this.hideEditThought)
+        document.addEventListener(Events.reloadFeed, this.hideEditThought)
 
         await API.main.getAvatar(this.props.thought.creator).then(avatar => {
             this.setState({avatar: avatar})
+        }).catch(err => {
+            this.setState({avatar: ""})
         })
     }
 
@@ -46,6 +48,8 @@ export default class Thought extends Component {
 
             await API.main.getAvatar(this.props.thought.creator).then(avatar => {
                 this.setState({avatar: avatar})
+            }).catch(err => {
+                this.setState({avatar: ""})
             })
         }
     }
@@ -105,7 +109,7 @@ export default class Thought extends Component {
                     await API.main.deleteComment(this.state.client, this.props.thought.id) : 
                     await API.main.deleteThought(this.state.client, this.props.thought.id)
                 
-                const event = new Event('reloadFeed')
+                const event = new Event(Events.reloadFeed)
                 document.dispatchEvent(event)
                 this.setState({loading: false})
                 break
@@ -173,7 +177,7 @@ export default class Thought extends Component {
                         <Image 
                             onClick={this.avatarClicked} 
                             src={this.state.avatar === "" ? 
-                            'https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg' : 
+                            '/avatar.jpeg' : 
                             `https://ipfs.io/ipfs/${this.state.avatar}` } avatar/> 
                         <span className={styles.uname}>{createdBy.username}</span> 
                         <span className={styles.handler}> @{creator} </span>

@@ -158,7 +158,7 @@ export default class ProfileView extends Component {
                 <Container textAlign="center"> 
                 <Popup 
                     content="Tap to edit." 
-                    trigger={<Image onClick={this.openFileSelect} style={{background: "grey"}} src={this.state.avatar === "" ? 'https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg' : `https://ipfs.io/ipfs/${this.state.avatar}`} circular centered size="small"/>} 
+                    trigger={<Image onClick={this.openFileSelect} style={{background: "grey"}} src={this.state.avatar === "" ? '/avatar.jpeg' : `https://ipfs.io/ipfs/${this.state.avatar}`} circular centered size="small"/>} 
                 />             
                     <Header as="h2" style={{marginBottom: '0px'}}>{this.state.user.username}</Header>
                     <Header sub style={{marginTop: '0px'}}>@{this.state.user.creator}</Header>
@@ -187,7 +187,7 @@ export default class ProfileView extends Component {
                         >
                             <Modal.Header>Edit profile</Modal.Header>
                             <Modal.Content>
-                                <Image src={this.state.avatar === "" ? 'https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg' : `https://ipfs.io/ipfs/${this.state.avatar}`} circular centered size="small"/>
+                                <Image src={this.state.avatar === "" ? '/avatar.jpeg' : `https://ipfs.io/ipfs/${this.state.avatar}`} circular centered size="small"/>
                                 <Form>
                                     <Form.Field>
                                         <label>Username</label>

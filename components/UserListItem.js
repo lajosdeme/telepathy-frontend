@@ -19,6 +19,8 @@ export default class UserListItem extends Component {
 
         await API.main.getAvatar(this.props.user.id).then(avatar => {
             this.setState({avatar: avatar})
+        }).catch(err => {
+            this.setState({avatar: ""})
         })
     }
 
@@ -29,14 +31,12 @@ export default class UserListItem extends Component {
 
         if (this.state.following) {
             await API.main.unfollowUser(client, this.props.user.id).then(res => {
-                console.log(res)
                 this.setState({following: !this.state.following})
             }).catch(err => {
                 alert(err)
             })
         } else {
             await API.main.followUser(client, this.props.user.id).then(res => {
-                console.log(res)
                 this.setState({following: !this.state.following})
             }).catch(err => {
                 alert(err)
@@ -48,7 +48,7 @@ export default class UserListItem extends Component {
         return(
             <List.Item>
                 <div>
-                <Image avatar src={this.state.avatar === "" ? 'https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg' : `https://ipfs.io/ipfs/${this.state.avatar}` } />
+                <Image avatar src={this.state.avatar === "" ? '/avatar.jpeg' : `https://ipfs.io/ipfs/${this.state.avatar}` } />
                 <span className={styles.uname}>{this.props.user.username}</span>
                 <span className={styles.handler}> @{this.props.user.creator} </span>
                 <span className={styles.followBtn}>

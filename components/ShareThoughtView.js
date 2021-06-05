@@ -5,6 +5,7 @@ import styles from './ShareThoughtView.module.css'
 import API from '../services/api'
 import { SigningCosmosClient } from '@cosmjs/launchpad'
 import Wallet from  '../services/wallet'
+import Events from '../config/events'
 
 export default class ShareThoughtView extends Component {
     //4, 11
@@ -38,6 +39,8 @@ export default class ShareThoughtView extends Component {
 
         await API.main.getAvatar(address).then(avatar => {
             this.setState({avatar: avatar})
+        }).catch(err => {
+            this.setState({avatar: ""})
         })
     }
 
@@ -54,14 +57,14 @@ export default class ShareThoughtView extends Component {
                 await API.main.setComment(this.state.client, this.props.id, this.state.message, this.state.commentThoughtId, this.props.ownerCommentId) :
                 await API.main.createComment(this.state.client, this.state.commentThoughtId, this.props.ownerCommentId, this.state.message)
             this.setState({message: "", loading: false})
-            const event = new Event('reloadFeed')
+            const event = new Event(Events.reloadFeed)
             document.dispatchEvent(event)
         } else {
             const result = this.state.isEdit ? 
                 await API.main.setThought(this.state.client, this.state.message, this.props.id) : 
                 await API.main.createThought(this.state.client, this.state.message)
             this.setState({message: "", loading: false})
-            const event = new Event('reloadFeed')
+            const event = new Event(Events.reloadFeed)
             document.dispatchEvent(event)
         }
     }
@@ -74,7 +77,7 @@ export default class ShareThoughtView extends Component {
                 <Grid centered columns={2}>
                     <Grid.Column centered width={this.props.imgWidth}>
                         <Image src={this.state.avatar === "" ? 
-                        'https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg' : 
+                        '/avatar.jpeg' : 
                         `https://ipfs.io/ipfs/${this.state.avatar}` } circular size="tiny"/>
                     </Grid.Column>
                     <Grid.Column width={this.props.textWidth}>

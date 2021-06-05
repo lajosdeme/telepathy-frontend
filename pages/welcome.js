@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import { Button, Container, Header, Input, Modal, Message } from 'semantic-ui-react'
+import { Button, Container, Header, Input, Modal, Message, Image } from 'semantic-ui-react'
 import Layout from '../components/Layout'
 import styles from './welcome.module.css'
 import Wallet from '../services/wallet'
@@ -57,6 +57,7 @@ export default class Welcome extends Component {
             <Layout loggedIn={this.state.unlocked}>
                 <div className={styles.mainContainer}>
                     <Container textAlign="center">
+                        <Image size="small" src="/telepathy_logo.png" centered />
                         <Header as="h1">Telepathy
                         <Header.Subheader>
                         Decentralized microblogging platform built on the blockchain
